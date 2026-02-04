@@ -4,9 +4,11 @@ import pandas as pd
 import pickle
 import base64 #decodificador imagen
 
-
+#Configuración basica de streamlit
 st.set_page_config(page_title="Estimación Tiempo de Entrega")
 
+#imagen tipo "hero" (cabecera)
+#Lee una imagen .jpeg, la convierte a base64 y la pinta con CSS
 def hero_image(path:Path, title:str="", subtitle:str=""):
     img_bytes = path.read_bytes()
     b64 = base64.b64encode(img_bytes).decode()
@@ -72,14 +74,22 @@ def hero_image(path:Path, title:str="", subtitle:str=""):
                 """,
                 unsafe_allow_html=True
                 )
+    
+#rutaas del proyecto
+#APP_DIR: carpeta del archivo app.py (webapp/)
+#ROOT_DIR: raíz del repo
+#MODEL_PATH: ruta del .pkl del modelo entrenado
 APP_DIR = Path(__file__).resolve().parent
 ROOT_DIR = APP_DIR.parent
 MODEL_PATH = ROOT_DIR / "models" / "random_forest_delivery_time.pkl"
 
+#Carga del modelo con .pkl
+#el .pkl contiene un pipeline (preprocesado + modelo)
 def load_model(path: Path):
     with open(path, "rb") as f:
         return pickle.load(f)
 
+#ruta de imagen
 ASSETS_DIR =  APP_DIR / "assets"
 HERO_PATH = ASSETS_DIR / "hero.jpeg"
 
@@ -89,42 +99,51 @@ hero_image(HERO_PATH,
 
 
 
-                
+#Títulos y layout              
 st.title("Tiempo estimado de entrega")
 st.caption("Formulario de entradas")
 
+#"card" visual
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("Datos del pedido")
 
+#3 columnas para inputs
+#las claves que se usan para predecir deben coincidir con el entrenamiento.
 col1, col2, col3 = st.columns(3)
 
+#inputs usuario
+#
 with col1:
-    order_status = st.selectbox("order_status", ["delivered", 
-                                                 "shipped", 
-                                                 "canceled", 
-                                                 "invoiced",
-                                                 "processing",
-                                                 "approved",
-                                                 "created"])
-    customer_state = st.text_input("customer_state (ej.: SP)", value="SP")
-    customer_city = st.text_input("customer city", value = "sao paulo")
-    customer_zip_code_prefix = st.number_input("customer_zip_code_prefix", min_value =0, value=10000, step=1)
+    order_status = st.selectbox("Estado del pedido", ["delivered", 
+                                                      "shipped", 
+                                                      "canceled", 
+                                                      "invoiced",
+                                                      "processing",
+                                                      "approved",
+                                                      "created"])
+    #Lista fija de estados BR sin depender del dataset
+    BR_STATES = ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"]
+    customer_state = st.selectbox("Provincia/Estado", BR_STATES, index=BR_STATES.index("SP"))
+    customer_city = st.text_input("Ciudad", value = "sao paulo")
+    customer_zip_code_prefix = st.number_input("Código postal (prefijo)", min_value =0, value=10000, step=1)
 
 with col2:
-    main_product_category = st.text_input("main_product_category", value="bed_bath_table")
-    total_items = st.number_input("total_items", min_value=1, value=2, step=1)
-    total_price = st.number_input("total_price", min_value=0.0, value=120.0, step=10.0)
-    total_freight = st.number_input("total_freight", min_value=0.0, value=25.0, step=5.0)
+    main_product_category = st.text_input("Categoría principal del producto", value="bed_bath_table")
+    total_items = st.number_input("Número de artículos", min_value=1, value=2, step=1)
+    total_price = st.number_input("Precio total", min_value=0.0, value=120.0, step=10.0)
+    total_freight = st.number_input("Coste de envío ", min_value=0.0, value=25.0, step=5.0)
 
 with col3:
-    payment_value = st.number_input("payment_value", min_value=0.0, value=145.0, step=10.0)
-    payment_installments = st.number_input("payment_installments", min_value=1, value=1, step=1)
-    geo_lat = st.number_input("geo_lat", value=-23.55, step=0.01, format="%.6f")
-    geo_lng = st.number_input("geo_lng", value=-46.63, step=0.01, format="%.6f")
-    purchase_hour = st.number_input("purchase_hour (0-23)", min_value=0, max_value=23, value=12, step=1)
-    purchase_weekday = st.number_input("purchase_weekday (0=Lun ... 6=Dom)", min_value=0, max_value=6, value=2, step=1)
-    approval_delay_hours = st.number_input("approval_delay_hours", min_value=0.0, value=0.0, step=1.0)
+    payment_value = st.number_input("Pago total", min_value=0.0, value=145.0, step=10.0)
+    payment_installments = st.number_input("Nº de cuotas", min_value=1, value=1, step=1)
+    geo_lat = st.number_input("Latitud", value=-23.55, step=0.01, format="%.6f")
+    geo_lng = st.number_input("Longitud", value=-46.63, step=0.01, format="%.6f")
+    #Features extra que el pipeline exige
+    purchase_hour = st.number_input("Hora de compra (0–23)", min_value=0, max_value=23, value=12, step=1)
+    purchase_weekday = st.number_input("Día de la semana (0=Lun … 6=Dom)", min_value=0, max_value=6, value=2, step=1)
+    approval_delay_hours = st.number_input("Retraso de aprobación (horas)", min_value=0.0, value=0.0, step=1.0)
 
+#Diccionario con nombres de columnas de entrenamiento
 features = {
     "order_status": order_status,
     "customer_city": customer_city,
@@ -142,17 +161,19 @@ features = {
     "purchase_weekday": purchase_weekday,
     "approval_delay_hours": approval_delay_hours}
 
+#ver input generado
 st.divider()
 st.subheader("Input generado")
 st.write(features)
 
+#predicción
 st.divider()
 st.subheader("Predicción")
 
 if st.button("Predecir ETA"):
     try:
         model = load_model(MODEL_PATH)
-
+        ## Construimos un DataFrame con 1 fila (un pedido)
         X = pd.DataFrame([features])#1 fila
         
         eta_days = float(model.predict(X)[0])
@@ -160,6 +181,7 @@ if st.button("Predecir ETA"):
         st.success(f"Tiempo estimado de entrega: **{eta_days:.2f} días**")
 
     except Exception as e:
+        #si hay errores de columnas
         st.error("Error al predecir. Revisa que las columnas coincidan con el entrenamiento.")
         st.exception(e)
 
