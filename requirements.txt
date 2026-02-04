@@ -18,14 +18,14 @@ plotly>=5.0.0
 # pymongo>=4.0.0
 
 # Web framework options
-# streamlit>=1.15.0
+streamlit>=1.15.0
 # flask>=2.2.0
 # uvicorn>=0.18.0
 # fastapi>=0.85.0
 
 # Model deployment
 # joblib>=1.2.0
-# pickle-mixin>=1.0.2
+pickle-mixin>=1.0.2
 
 # Development and testing
 # pytest>=7.0.0
