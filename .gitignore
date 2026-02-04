@@ -4,7 +4,7 @@ __pycache__
 
 # Data & models folders in Data Science & Machine Learing Projecto
 data/
-models/
+# models/
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio, WebStorm and Rider
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
