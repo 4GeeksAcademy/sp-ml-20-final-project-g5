@@ -107,78 +107,83 @@ st.caption("Formulario de entradas")
 st.markdown('<div class="card">', unsafe_allow_html=True)
 st.subheader("Datos del pedido")
 
+#Form: evita reruns para cada input
+with st.form("eta_form"):
+
 #3 columnas para inputs
 #las claves que se usan para predecir deben coincidir con el entrenamiento.
-col1, col2, col3 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
 
 #inputs usuario
+    with col1:
+        order_status = st.selectbox("Estado del pedido", ["delivered", 
+                                                          "shipped", 
+                                                          "canceled", 
+                                                          "invoiced",
+                                                          "processing",
+                                                          "approved",
+                                                          "created"])
+        #Lista fija de estados BR sin depender del dataset
+        BR_STATES = ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"]
+        customer_state = st.selectbox("Provincia/Estado", BR_STATES, index=BR_STATES.index("SP"))
+        customer_city = st.text_input("Ciudad", value = "sao paulo")
+        customer_zip_code_prefix = st.number_input("Código postal (prefijo)", min_value =0, value=10000, step=1)
+
+    with col2:
+        main_product_category = st.text_input("Categoría principal del producto", value="bed_bath_table")
+        total_items = st.number_input("Número de artículos", min_value=1, value=2, step=1)
+        total_price = st.number_input("Precio total", min_value=0.0, value=120.0, step=10.0)
+        total_freight = st.number_input("Coste de envío ", min_value=0.0, value=25.0, step=5.0)
+
+    with col3:
+        payment_value = st.number_input("Pago total", min_value=0.0, value=145.0, step=10.0)
+        payment_installments = st.number_input("Nº de cuotas", min_value=1, value=1, step=1)
+        geo_lat = st.number_input("Latitud", value=-23.55, step=0.01, format="%.6f")
+        geo_lng = st.number_input("Longitud", value=-46.63, step=0.01, format="%.6f")
+        #Features extra que el pipeline exige
+        purchase_hour = st.number_input("Hora de compra (0–23)", min_value=0, max_value=23, value=12, step=1)
+        purchase_weekday = st.number_input("Día de la semana (0=Lun … 6=Dom)", min_value=0, max_value=6, value=2, step=1)
+        approval_delay_hours = st.number_input("Retraso de aprobación (horas)", min_value=0.0, value=0.0, step=1.0)
+
 #
-with col1:
-    order_status = st.selectbox("Estado del pedido", ["delivered", 
-                                                      "shipped", 
-                                                      "canceled", 
-                                                      "invoiced",
-                                                      "processing",
-                                                      "approved",
-                                                      "created"])
-    #Lista fija de estados BR sin depender del dataset
-    BR_STATES = ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"]
-    customer_state = st.selectbox("Provincia/Estado", BR_STATES, index=BR_STATES.index("SP"))
-    customer_city = st.text_input("Ciudad", value = "sao paulo")
-    customer_zip_code_prefix = st.number_input("Código postal (prefijo)", min_value =0, value=10000, step=1)
-
-with col2:
-    main_product_category = st.text_input("Categoría principal del producto", value="bed_bath_table")
-    total_items = st.number_input("Número de artículos", min_value=1, value=2, step=1)
-    total_price = st.number_input("Precio total", min_value=0.0, value=120.0, step=10.0)
-    total_freight = st.number_input("Coste de envío ", min_value=0.0, value=25.0, step=5.0)
-
-with col3:
-    payment_value = st.number_input("Pago total", min_value=0.0, value=145.0, step=10.0)
-    payment_installments = st.number_input("Nº de cuotas", min_value=1, value=1, step=1)
-    geo_lat = st.number_input("Latitud", value=-23.55, step=0.01, format="%.6f")
-    geo_lng = st.number_input("Longitud", value=-46.63, step=0.01, format="%.6f")
-    #Features extra que el pipeline exige
-    purchase_hour = st.number_input("Hora de compra (0–23)", min_value=0, max_value=23, value=12, step=1)
-    purchase_weekday = st.number_input("Día de la semana (0=Lun … 6=Dom)", min_value=0, max_value=6, value=2, step=1)
-    approval_delay_hours = st.number_input("Retraso de aprobación (horas)", min_value=0.0, value=0.0, step=1.0)
-
 #Diccionario con nombres de columnas de entrenamiento
-features = {
-    "order_status": order_status,
-    "customer_city": customer_city,
-    "customer_state": customer_state,
-    "customer_zip_code_prefix": customer_zip_code_prefix,
-    "main_product_category": main_product_category,
-    "total_items": total_items,
-    "total_price": total_price,
-    "total_freight": total_freight,
-    "payment_value": payment_value,
-    "payment_installments": payment_installments,
-    "geo_lat": geo_lat,
-    "geo_lng": geo_lng,
-    "purchase_hour": purchase_hour,
-    "purchase_weekday": purchase_weekday,
-    "approval_delay_hours": approval_delay_hours}
+    features = {
+        "order_status": order_status,
+        "customer_city": customer_city,
+        "customer_state": customer_state,
+        "customer_zip_code_prefix": customer_zip_code_prefix,
+        "main_product_category": main_product_category,
+        "total_items": total_items,
+        "total_price": total_price,
+        "total_freight": total_freight,
+        "payment_value": payment_value,
+        "payment_installments": payment_installments,
+        "geo_lat": geo_lat,
+        "geo_lng": geo_lng,
+        "purchase_hour": purchase_hour,
+        "purchase_weekday": purchase_weekday,
+        "approval_delay_hours": approval_delay_hours}
+
+    #submit dentro del form
+    submitted = st.form_submit_button("Predecir ETA")
 
 #ver input generado
 st.divider()
-st.subheader("Input generado")
-st.write(features)
+
+#ocultar input generado
+with st.expander("Ver input"):
+    st.json(features)
 
 #predicción
 st.divider()
 st.subheader("Predicción")
 
-if st.button("Predecir ETA"):
+if submitted:
     try:
         model = load_model(MODEL_PATH)
-        ## Construimos un DataFrame con 1 fila (un pedido)
-        X = pd.DataFrame([features])#1 fila
-        
+        X = pd.DataFrame([features])# Construimos un DataFrame con 1 fila (un pedido)
         eta_days = float(model.predict(X)[0])
-
-        st.success(f"Tiempo estimado de entrega: **{eta_days:.2f} días**")
+        st.success(f"Tiempo estimado de entrega: **{eta_days:.2f} días**")        
 
     except Exception as e:
         #si hay errores de columnas
