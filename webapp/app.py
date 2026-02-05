@@ -75,13 +75,30 @@ def hero_image(path:Path, title:str="", subtitle:str=""):
                 unsafe_allow_html=True
                 )
     
-#rutaas del proyecto
+"""Rutas del proyecto"""
 #APP_DIR: carpeta del archivo app.py (webapp/)
-#ROOT_DIR: raíz del repo
-#MODEL_PATH: ruta del .pkl del modelo entrenado
 APP_DIR = Path(__file__).resolve().parent
+
+#ROOT_DIR: raíz del repo
 ROOT_DIR = APP_DIR.parent
+
+#MODEL_PATH: ruta del .pkl del modelo entrenado
 MODEL_PATH = ROOT_DIR / "models" / "random_forest_delivery_time.pkl"
+
+@st.cache_data #decorador cargar en caché para agilizar reruns
+def load_df_model(root_dir:Path) -> pd.DataFrame | None: # recibe raíz del repo, devuelve un datafram o None si no puede cargarlo
+    path = root_dir / "data" / "processed" / "df_model.csv"#ruta al archivo
+    if not path.exists():
+        return None# permite usar "text_input" si no existe el archivo
+    return pd.read_csv(path)
+
+ref_df = load_df_model(ROOT_DIR)
+#eliminamos nulos, espacios y controlar str 
+if ref_df is not None:
+    city_options = sorted(ref_df["customer_city"].dropna().astype(str).str.strip().unique)
+    cat_options = sorted(ref_df["main_product_category"].dropna().astype(str).str.strip().unique)
+else:
+    city_options, cat_options =None, None
 
 #Carga del modelo con .pkl
 #el .pkl contiene un pipeline (preprocesado + modelo)
