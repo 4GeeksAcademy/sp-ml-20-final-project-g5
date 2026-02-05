@@ -93,10 +93,11 @@ def load_df_model(root_dir:Path) -> pd.DataFrame | None: # recibe raíz del repo
     return pd.read_csv(path)
 
 ref_df = load_df_model(ROOT_DIR)
+
 #eliminamos nulos, espacios y controlar str 
 if ref_df is not None:
-    city_options = sorted(ref_df["customer_city"].dropna().astype(str).str.strip().unique)
-    cat_options = sorted(ref_df["main_product_category"].dropna().astype(str).str.strip().unique)
+    city_options = sorted(ref_df["customer_city"].dropna().astype(str).str.strip().unique())
+    cat_options = sorted(ref_df["main_product_category"].dropna().astype(str).str.strip().unique())
 else:
     city_options, cat_options =None, None
 
@@ -113,8 +114,6 @@ HERO_PATH = ASSETS_DIR / "hero.jpeg"
 hero_image(HERO_PATH,
            title="Estimación del tiempo de entrega",
            subtitle="Producto mínimo viable para la predicción de entregas a clientes")  
-
-
 
 #Títulos y layout              
 st.title("Tiempo estimado de entrega")
@@ -144,11 +143,30 @@ with st.form("eta_form"):
         #Lista fija de estados BR sin depender del dataset
         BR_STATES = ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"]
         customer_state = st.selectbox("Estado", BR_STATES, index=BR_STATES.index("SP"), help="Estado brasileño: SP Sao Paulo, BA Bahía, etc")
-        customer_city = st.text_input("Ciudad", value = "sao paulo", help="Ciudad del cliente. Ej. Sao Paulo")
+       
+        #si esxiste city_options selectbox, saca valores unicos de customer_city
+        #si no existe, text_input
+        if city_options:
+            customer_city = st.selectbox("Ciudad",
+                                         city_options,
+                                         index=city_options.index("sao paulo") if "sao paulo" in city_options else 0,
+                                         help="Lista cargada desde csv para evitar errores de escritura")
+        else:
+            customer_city = st.text_input("Ciudad", value="sao paulo", help="Ciudad del cliente. Ej: sao paulo")
+
         customer_zip_code_prefix = st.number_input("Código postal (prefijo)", min_value =0, value=10000, step=1, help="Prefijo del codigo postal. Ej: 01000")
 
     with col2:
-        main_product_category = st.text_input("Categoría principal del producto", value="bed_bath_table")
+        #si existe cat_option selectbox, saca valores unicos de "main_product_category"
+        #si no existe, text_input
+        if cat_options:
+            main_product_category = st.selectbox("Categoría", 
+                                                 cat_options, 
+                                                 index=cat_options.index("bed_bath_table") if "bed_bath_table" in cat_options else 0,
+                                                 help="Lista cargada desde csv para evitar tipos")
+        else:
+            main_product_category = st.text_input("Categoría", value="bed_bath_table", help="Categoría principal del producto. Ej: bed_bath_table")
+        
         total_items = st.number_input("Número de artículos", min_value=1, value=2, step=1, help="Cantidad total de artículos en el pedido")
         total_price = st.number_input("Precio total(R$)", min_value=0.0, value=120.0, step=10.0, help="Suma del precio de los artículos ( sin envío)")
         total_freight = st.number_input("Envio (R$)", min_value=0.0, value=25.0, step=5.0, help="Coste total del envío. Real brasileño")
