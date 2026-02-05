@@ -122,28 +122,29 @@ with st.form("eta_form"):
                                                           "invoiced",
                                                           "processing",
                                                           "approved",
-                                                          "created"])
+                                                          "created"],
+                                    help="situación actual delpedido en el sistema")
         #Lista fija de estados BR sin depender del dataset
         BR_STATES = ["AC","AL","AM","AP","BA","CE","DF","ES","GO","MA","MG","MS","MT","PA","PB","PE","PI","PR","RJ","RN","RO","RR","RS","SC","SE","SP","TO"]
-        customer_state = st.selectbox("Provincia/Estado", BR_STATES, index=BR_STATES.index("SP"))
-        customer_city = st.text_input("Ciudad", value = "sao paulo")
-        customer_zip_code_prefix = st.number_input("Código postal (prefijo)", min_value =0, value=10000, step=1)
+        customer_state = st.selectbox("Estado", BR_STATES, index=BR_STATES.index("SP"), help="Estado brasileño: SP Sao Paulo, BA Bahía, etc")
+        customer_city = st.text_input("Ciudad", value = "sao paulo", help="Ciudad del cliente. Ej. Sao Paulo")
+        customer_zip_code_prefix = st.number_input("Código postal (prefijo)", min_value =0, value=10000, step=1, help="Prefijo del codigo postal. Ej: 01000")
 
     with col2:
         main_product_category = st.text_input("Categoría principal del producto", value="bed_bath_table")
-        total_items = st.number_input("Número de artículos", min_value=1, value=2, step=1)
-        total_price = st.number_input("Precio total", min_value=0.0, value=120.0, step=10.0)
-        total_freight = st.number_input("Coste de envío ", min_value=0.0, value=25.0, step=5.0)
+        total_items = st.number_input("Número de artículos", min_value=1, value=2, step=1, help="Cantidad total de artículos en el pedido")
+        total_price = st.number_input("Precio total(R$)", min_value=0.0, value=120.0, step=10.0, help="Suma del precio de los artículos ( sin envío)")
+        total_freight = st.number_input("Envio (R$)", min_value=0.0, value=25.0, step=5.0, help="Coste total del envío. Real brasileño")
 
     with col3:
-        payment_value = st.number_input("Pago total", min_value=0.0, value=145.0, step=10.0)
-        payment_installments = st.number_input("Nº de cuotas", min_value=1, value=1, step=1)
-        geo_lat = st.number_input("Latitud", value=-23.55, step=0.01, format="%.6f")
-        geo_lng = st.number_input("Longitud", value=-46.63, step=0.01, format="%.6f")
+        payment_value = st.number_input("Pago total", min_value=0.0, value=145.0, step=10.0, help="importe pagado por el cliente (incluyendo envío si aplica)")
+        payment_installments = st.number_input("Nº de cuotas", min_value=1, value=1, step=1, help="Número de cuotas del pago")
+        geo_lat = st.number_input("Latitud", value=-23.55, step=0.01, format="%.6f",help="Coordenada aproximada del cliente (latitud).")
+        geo_lng = st.number_input("Longitud", value=-46.63, step=0.01, format="%.6f",help="Coordenada aproximada del cliente (longitud).")
         #Features extra que el pipeline exige
-        purchase_hour = st.number_input("Hora de compra (0–23)", min_value=0, max_value=23, value=12, step=1)
-        purchase_weekday = st.number_input("Día de la semana (0=Lun … 6=Dom)", min_value=0, max_value=6, value=2, step=1)
-        approval_delay_hours = st.number_input("Retraso de aprobación (horas)", min_value=0.0, value=0.0, step=1.0)
+        purchase_hour = st.number_input("Hora de compra (0–23)", min_value=0, max_value=23, value=12, step=1, help="Hora del día en la que se realizó la compra (0–23).")
+        purchase_weekday = st.number_input("Día de la semana", min_value=0, max_value=6, value=2, step=1, help="0=Lun … 6=Dom")
+        approval_delay_hours = st.number_input("Retraso de aprobación (horas)", min_value=0.0, value=0.0, step=1.0, help="Horas desde la compra hasta la aprobación del pedido.")
 
 #
 #Diccionario con nombres de columnas de entrenamiento
