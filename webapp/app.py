@@ -7,7 +7,8 @@ import base64 #decodificador imagen
 #Configuración basica de streamlit
 st.set_page_config(page_title="Estimación Tiempo de Entrega")
 
-#imagen tipo "hero" (cabecera)
+### IMAGEN ###
+#carga imagen tipo "hero" (cabecera)
 #Lee una imagen .jpeg, la convierte a base64 y la pinta con CSS
 def hero_image(path:Path, title:str="", subtitle:str=""):
     img_bytes = path.read_bytes()
@@ -75,6 +76,8 @@ def hero_image(path:Path, title:str="", subtitle:str=""):
                 unsafe_allow_html=True
                 )
     
+### Paths ###
+   
 """Rutas del proyecto"""
 #APP_DIR: carpeta del archivo app.py (webapp/)
 APP_DIR = Path(__file__).resolve().parent
