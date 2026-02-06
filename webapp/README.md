@@ -11,4 +11,8 @@ Esta carpeta contiene una app *Streamlit* para predecir el **tiempo estimado (d√
 Desde la ra√≠z del repositorio
 
 ```bash
-streamlit run webapp/app.py 
+streamlit run webapp/app.py ```
+
+## Nota (MVP)
+
+Si se reentrena el modelo con nuevas variables, hay que actualizar el formulario y `features` en `webapp/app.py`.
